@@ -2511,8 +2511,8 @@ class Move(Enum):
 
 
 class Action(Enum):
-    YOU_WON = auto()
-    YOU_FAILED = auto()
+    WIN = auto()
+    LOSE = auto()
     DRAW = auto()
 
 
@@ -2528,10 +2528,10 @@ def dispatch(your_choose: Move, opponent_choose: Move) -> Optional[Action]:
             return Action.DRAW
         case (Move.ROCK, Move.SCISSORS) | (Move.SCISSORS, Move.PAPER) | (Move.PAPER, Move.ROCK):
             # Move one is won
-            return Action.YOU_WON
+            return Action.WIN
         case (Move.SCISSORS, Move.ROCK) | (Move.PAPER, Move.SCISSORS) | (Move.ROCK, Move.PAPER):
             # Move two is won
-            return Action.YOU_FAILED
+            return Action.LOSE
 
 
 MOVES = {
@@ -2551,10 +2551,31 @@ POINT_PER_MOVE = {
 
 
 POINTS_PER_ACTION = {
-    Action.YOU_WON: 6,
-    Action.YOU_FAILED: 0,
+    Action.WIN: 6,
+    Action.LOSE: 0,
     Action.DRAW: 3,
 }
+
+
+MOVES_MEANS = {
+    'Y': Action.DRAW,
+    'X': Action.LOSE,
+    'Z': Action.WIN,
+}
+
+
+WIN_MOVE_VS_MOVE = {
+    Move.ROCK: Move.PAPER, # rock defeat paper
+    Move.SCISSORS: Move.ROCK, # scissors defeat rock
+    Move.PAPER: Move.SCISSORS, # paper defeat scissors
+}
+
+LOSE_MOVE_VS_MOVE = {
+    Move.PAPER: Move.ROCK, # rock defeat paper
+    Move.ROCK: Move.SCISSORS, # scissors defeat rock
+    Move.SCISSORS: Move.PAPER, # paper defeat scissors
+}
+
 
 
 def solve_puzzle_one():
@@ -2566,3 +2587,21 @@ def solve_puzzle_one():
         opponent_choose, your_choose = [MOVES[choose] for choose in move.split()]
         your_points += POINTS_PER_ACTION[dispatch(your_choose, opponent_choose)] + POINT_PER_MOVE[your_choose]
     print(f"Result for puzzle 2 part one: {your_points}")
+
+
+def solve_puzzle_two():
+    # Split each move into a list of moves -> ['A X', 'B Z', ..., 'C Y']
+    moves = input_data.strip().splitlines()
+    points = 0
+    for move in moves:
+        # ['A', 'X'] -> [Move.Rock, Move.Paper]
+        opponent_choose, your_choose = [MOVES[choose] for choose in move.split()]
+        action = MOVES_MEANS[move.split()[1]]
+        if action == Action.DRAW:
+            your_choose = opponent_choose
+        elif action == Action.WIN:
+            your_choose = WIN_MOVE_VS_MOVE[opponent_choose]
+        elif action == Action.LOSE:
+            your_choose = LOSE_MOVE_VS_MOVE[opponent_choose]
+        points += POINTS_PER_ACTION[action] + POINT_PER_MOVE[your_choose]
+    print(f"Result for puzzle 2 part two: {points}")
