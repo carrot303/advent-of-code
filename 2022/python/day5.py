@@ -52,7 +52,7 @@ def solve_puzzle_one() -> str:
 
     # Execute steps for stacks
     for step in steps:
-        count, crates_from_id, crates_to_id = re.findall(r'\d+', step)
+        count, crates_from_id, crates_to_id = re.findall(r'\d+', step) # --> 'move 1 from 2 to 3': ['1', '2', '3'] 
         for _ in range(int(count)):
             # Pop from `crates_from_id` stack and push to `crates_to_id` stack
             crate_from = crates_per_stack[crates_from_id].pop()
@@ -73,7 +73,7 @@ def solve_puzzle_two() -> str:
 
     # Execute steps for stacks
     for step in steps:
-        count, crates_from_id, crates_to_id = re.findall(r'\d+', step)
+        count, crates_from_id, crates_to_id = re.findall(r'\d+', step) # --> 'move 1 from 2 to 3': ['1', '2', '3'] 
         temp_crates = []
         for _ in range(int(count)):
             # Pop from `crates_from_id` stack and push to `crates_to_id` stack
