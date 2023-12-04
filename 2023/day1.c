@@ -11,7 +11,7 @@ int main() {
 
     fptr = fopen("./inputs/day1.txt", "r");
     if (fptr == NULL) {
-        perror("Error in opening file day1.txt\n");
+        perror("Error in opening file day1.txt");
         return 1;
     }
     while ((fgets(line, 100, fptr)) != NULL) {
