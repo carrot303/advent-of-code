@@ -75,7 +75,6 @@ int main(int argc, char const *argv[])
 	for (int i = 0; i < k; i++) {
 		if (numlocs[i].type == 'n'){
 			for (int j = 0; j < k; j++) {
-				// UP
 				if ((numlocs[j].type == 's') &&
 					(ADJACENT(numlocs[i].row, numlocs[j].row)) &&
 					(SAME_RANGE(numlocs[j].start, numlocs[i].start, numlocs[j].end, numlocs[i].end))) {
