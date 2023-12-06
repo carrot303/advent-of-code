@@ -1,5 +1,3 @@
-from collections import Counter
-
 with open("inputs/day4.txt") as file:
 	puzzle = file.read().strip()
 
