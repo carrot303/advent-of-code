@@ -14,13 +14,8 @@ int power(int i, int b) {
 int main() {
 	FILE *fp;
 	char line[MAX_LINE];
-	int winnumbers[10];
-	int own_numbers[25];
-	int scrathcards[250] = {0};
-	int card_id = 0;
-	int number = 0;
-	int result = 0;
-	int result2 = 0;
+	int winnumbers[10], own_numbers[25], scrathcards[250] = {0};
+	int card_id = 0, number = 0, result = 0, result2 = 0;
 
 	fp = fopen("inputs/day4.txt", "r");
 	if (fp == NULL) {
@@ -63,11 +58,13 @@ int main() {
 				}
 			}
 		}
-		scrathcards[card_id]++;
-		result2++;
 		if (same_cards) {
 			result += power(2, same_cards-1);
 		}
+
+		// Part two
+		scrathcards[card_id]++;
+		result2++;
 		for (int i = 0; i < scrathcards[card_id]; i++) {
 			for (int j = card_id+1; j < card_id+same_cards+1; j++) {
 				scrathcards[j]++;
