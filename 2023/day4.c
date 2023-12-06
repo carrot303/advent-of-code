@@ -20,6 +20,7 @@ int main() {
 	int card_id = 0;
 	int number = 0;
 	int result = 0;
+	int result2 = 0;
 
 	fp = fopen("inputs/day4.txt", "r");
 	if (fp == NULL) {
@@ -63,24 +64,19 @@ int main() {
 			}
 		}
 		scrathcards[card_id]++;
+		result2++;
 		if (same_cards) {
 			result += power(2, same_cards-1);
 		}
 		for (int i = 0; i < scrathcards[card_id]; i++) {
 			for (int j = card_id+1; j < card_id+same_cards+1; j++) {
 				scrathcards[j]++;
+				result2++;
 			}
 		}
 	}
 	printf("Part one: %d\n", result);
-
-	result = 0;
-	for (int i=0; i < 250; i++) {
-		if (scrathcards[i] > 0) {
-			result += scrathcards[i];
-		}
-	}
-	printf("Part two: %d\n", result);
+	printf("Part two: %d\n", result2);
 
 	fclose(fp);
 	return 0;
