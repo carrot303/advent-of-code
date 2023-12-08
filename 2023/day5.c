@@ -34,6 +34,10 @@ int main() {
 	memset(maps, 0, sizeof(maps));
 
 	fp = fopen("inputs/day5.txt", "r");
+	if (fp == NULL) {
+		perror("Error in opening file day5.txt");
+		return 1;
+	}
 
 	fgets(firstline, MAX_LINE, fp); // seeds
 	int j = 0;
