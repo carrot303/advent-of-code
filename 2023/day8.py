@@ -1,5 +1,3 @@
-import time
-
 with open("inputs/day8.txt") as file:
 	puzzle = file.read().strip()
 
