@@ -1,5 +1,3 @@
-import itertools
-
 
 input = """
 190: 10 19
@@ -16,30 +14,15 @@ input = """
 with open("input_day7.txt") as file: input = file.read()
 
 
-def cal(f, lst, ops):
-	ps = itertools.product(ops, repeat=len(lst)-1)
-
-	for p in ps:
-		lp = list(p)
-		op = lp.pop(0)
-		if op == "*":
-			res = lst[0] * lst[1]
-		elif op == "+":
-			res = lst[0] + lst[1]
-		else:
-			res = int(str(lst[0]) + str(lst[1]))
-
-		for num in lst[2:]:
-			op = lp.pop(0)
-			if op == "*":
-				res *= num
-			elif op == "+":
-				res += num
-			else:
-				res = int(str(res) + str(num))
-		if res == f:
-			return True
-
+def valid(target, numbers, cat=False):
+	if len(numbers) == 1:
+		return target == numbers[0]
+	if valid(target, [numbers[0]+numbers[1]]+numbers[2:], cat):
+		return True
+	if valid(target, [numbers[0]*numbers[1]]+numbers[2:], cat):
+		return True
+	if cat and valid(target, [int(str(numbers[0])+str(numbers[1]))]+numbers[2:], cat):
+		return True
 	return False
 
 
@@ -47,7 +30,8 @@ def part1():
 	cnt = 0
 	for line in input.strip().split("\n"):
 		result, *numbers = [int(i) for i in line.replace(":", "").split(" ")]
-		if cal(result, numbers, "+*"): cnt += result
+		if valid(result, numbers):
+			cnt += result
 	return cnt
 
 
@@ -55,7 +39,8 @@ def part2():
 	cnt = 0
 	for line in input.strip().split("\n"):
 		result, *numbers = [int(i) for i in line.replace(":", "").split(" ")]
-		if cal(result, numbers, "+*|"): cnt += result
+		if valid(result, numbers, True):
+			cnt += result
 	return cnt
 
 
