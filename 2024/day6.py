@@ -1,10 +1,11 @@
+_input = input
 input = """
 ....#.....
 .........#
 ..........
 ..#.......
+..#....#..
 .......#..
-..........
 .#..^.....
 ........#.
 #.........
@@ -15,68 +16,56 @@ input = """
 
 mmap = [list(line) for line in input.strip().split("\n")]
 
-l = len(mmap[0])
-y_guard = input.strip().find("^")//(l+1)
-x_guard = input.strip().find("^")%(l+1)
-
-steps = []
-dir_steps = []
-blocks = []
-direction = ["up", "right", "down", "left"]
-direction_movement = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-obs = 0
-steps_count = 0
-
-# not efficient
-blocks_according_to_dir = {
-	"up": (
-		lambda s: [b for b in blocks if b[0] == s[0] and b[1] > s[1]],
-		lambda s: [b for b in blocks if b[1] == s[1] and b[0] > s[0]],
-	),
-	"right": (
-		lambda s: [b for b in blocks if b[0] == s[0] and b[1] < s[1]],
-		lambda s: [b for b in blocks if b[1] == s[1] and b[0] > s[0]],
-	),
-	"down": (
-		lambda s: [b for b in blocks if b[0] == s[0] and b[1] < s[1]],
-		lambda s: [b for b in blocks if b[1] == s[1] and b[0] < s[0]],
-	),
-	"left": (
-		lambda s: [b for b in blocks if b[0] == s[0] and b[1] > s[1]],
-		lambda s: [b for b in blocks if b[1] == s[1] and b[0] < s[0]],
-	),
+g_index = input.strip().find("^")
+[(row, col)] = [(r,c) for r in range(len(mmap)) for c in range(len(mmap[r])) if mmap[r][c] == "^"]
+directions = ["up", "right", "down", "left"]
+step_direction = {
+	"up": (-1, 0),
+	"right": (0, 1),
+	"down": (1, 0),
+	"left": (0, -1)
 }
 
-def loop_possible(step, dir):
-	h = blocks_according_to_dir[dir][0](step)
-	v = blocks_according_to_dir[dir][1](step)
-	for i in h:
-		for j in v:
-			py = step[0] ^ i[0] ^ j[0]
-			px = step[1] ^ i[1] ^ j[1]
-			if (py, px) in blocks:
-				print(step, i, j, (py,px), dir)
+
+def in_bound(row, col):
+	return row >= 0 and row < len(mmap) and col >= 0 and col < len(mmap[0])
 
 
-while True:
-	idx = obs % len(direction)
-	cdir = direction[idx]
-	ychange, xchange = direction_movement[idx]
-	if y_guard+ychange >= len(mmap) or x_guard+xchange >= len(mmap[0]):
-		break
-	if mmap[y_guard+ychange][x_guard+xchange] == "#":
-		blocks.append((y_guard,x_guard))
-		obs += 1
-		continue
-	y_guard += ychange
-	x_guard += xchange
-	if not (y_guard,x_guard) in steps: steps_count += 1
-	steps.append((y_guard,x_guard))
-	dir_steps.append(cdir)
+def walk(direction="up", row=row, col=col, set_obs=True):
+	direction_index = directions.index(direction)
+	visited_steps = [(["."] * len(mmap[i])) for i in range(len(mmap))]
+	step_count = 0
+	loops_count = 0
+	while True:
+		cdir = directions[direction_index%4]
+		r, c = step_direction[cdir]
+		if not in_bound(row+r, col+c): break
+		if mmap[row+r][col+c] == "#":
+			direction_index += 1
+			continue
+
+		row += r
+		col += c
+		if visited_steps[row][col] == cdir[0]:
+			return step_count, True, loops_count
+		step_count += visited_steps[row][col] == "."
+		visited_steps[row][col] = cdir[0]
+		if not set_obs:
+			continue
+
+		r, c = step_direction[cdir]
+		if not in_bound(row+r, col+c): break
+		if mmap[row+r][col+c] == "#": continue
+		mmap[row+r][col+c] = "#"
+		if walk(cdir, row, col, set_obs=False)[1]:
+			loops_count += 1
+			mmap[row+r][col+c] = "O"
+		else:
+			mmap[row+r][col+c] = "."
+
+	return step_count, False, loops_count
 
 
-for i in range(len(steps)):
-	loop_possible(steps[i], dir_steps[i])
-
-
-print("Part 1:", steps_count)
+step, _, count= walk(set_obs=True)
+print("Part 1:", step)
+print("Part 2:", count)
