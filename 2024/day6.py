@@ -68,4 +68,5 @@ def walk(direction="up", row=row, col=col, set_obs=True):
 
 step, _, count= walk(set_obs=True)
 print("Part 1:", step)
+# part 2 is wrong currently
 print("Part 2:", count)
