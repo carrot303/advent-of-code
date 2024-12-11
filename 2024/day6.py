@@ -1,18 +1,19 @@
+import copy
 _input = input
 input = """
-....#.....
-.........#
-..........
-..#.......
-..#....#..
-.......#..
-.#..^.....
-........#.
-#.........
-......#...
+....#...........
+#...^....#......
+..............#.
+..#.............
+#......#........
+...........#....
+.#..............
+........#.......
+#...........#...
+...#..#..#....#
 """
 
-# with open("input_day6.txt") as file: input = file.read()
+with open("input_day6.txt") as file: input = file.read()
 
 mmap = [list(line) for line in input.strip().split("\n")]
 
@@ -25,48 +26,61 @@ step_direction = {
 	"down": (1, 0),
 	"left": (0, -1)
 }
+steps = []
 
 
 def in_bound(row, col):
 	return row >= 0 and row < len(mmap) and col >= 0 and col < len(mmap[0])
 
 
-def walk(direction="up", row=row, col=col, set_obs=True):
+def walk(direction="up", row=row, col=col, mark_steps=True):
 	direction_index = directions.index(direction)
 	visited_steps = [(["."] * len(mmap[i])) for i in range(len(mmap))]
 	step_count = 0
-	loops_count = 0
+
 	while True:
 		cdir = directions[direction_index%4]
 		r, c = step_direction[cdir]
 		if not in_bound(row+r, col+c): break
 		if mmap[row+r][col+c] == "#":
 			direction_index += 1
+			mark_steps and steps.append((row, col, directions[direction_index%4]))
 			continue
 
 		row += r
 		col += c
 		if visited_steps[row][col] == cdir[0]:
-			return step_count, True, loops_count
+			return step_count, True
 		step_count += visited_steps[row][col] == "."
+		mark_steps and steps.append((row, col, cdir))
 		visited_steps[row][col] = cdir[0]
-		if not set_obs:
-			continue
 
-		r, c = step_direction[cdir]
-		if not in_bound(row+r, col+c): break
-		if mmap[row+r][col+c] == "#": continue
-		mmap[row+r][col+c] = "#"
-		if walk(cdir, row, col, set_obs=False)[1]:
-			loops_count += 1
-			mmap[row+r][col+c] = "O"
-		else:
-			mmap[row+r][col+c] = "."
-
-	return step_count, False, loops_count
+	return step_count, False
 
 
-step, _, count= walk(set_obs=True)
+step, _ = walk()
 print("Part 1:", step)
-# part 2 is wrong currently
-print("Part 2:", count)
+
+
+# goes trough the guard's steps that taken
+# check that placing an obstruction in front of guard is make a loop or not
+loops = set()
+for row, col, direction in steps:
+	r,c = step_direction[direction]
+	nr, nc = row+r, col+c
+	if not in_bound(nr, nc):
+		break
+
+	# already has an obs in front of guard
+	if mmap[nr][nc] == "#": continue
+
+	# set temp obs
+	mmap[nr][nc] = "#"
+	_, looped = walk(direction, row, col, mark_steps=False)
+	if looped:
+		loops.add((nr,nc))
+
+	# visualization (just for debug)
+	mmap[nr][nc] = "."
+
+print("Part 2:", len(loops))
