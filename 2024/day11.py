@@ -1,33 +1,31 @@
+import copy
 import sys
+from collections import defaultdict, Counter
 
 input = "125 17"
 with open("input_day11.txt") as file: input = file.read()
 
-stones = [int(i) for i in input.strip().split()]
-dp = {}
+stones = {int(i): 1 for i in input.strip().split()}
+stones = defaultdict(int, stones)
 
 
-def blink(stone, times):
+def blink(temp):
+	for k, v in stones.items():
+		if temp[k] == 0: continue
+		temp[k] -= v
+		if k == 0:
+			temp[1] += v
+		elif len(str(k)) % 2 == 0:
+			h1, h2 = int(str(k)[:len(str(k))//2]), int(str(k)[len(str(k))//2:])
+			temp[h1] += v
+			temp[h2] += v
+		else:
+			temp[k*2024] += v
+	return temp
 
-	if (stone, times) in dp:
-		return dp[(stone, times)]
+times = int(sys.argv[1])
+for i in range(times):
+	stones = blink(copy.deepcopy(stones))
 
-	if times <= 0:
-		return [stone]
-
-	if stone == 0:
-		return blink(1, times-1)
-	elif len(str(stone)) % 2 == 0:
-		l = len(str(stone))
-		h1, h2 = int(str(stone)[:l//2]), int(str(stone)[l//2:])		
-		return blink(h1, times-1) + blink(h2, times-1)
-	else:
-		return blink(stone*2024, times-1)
-
-
-p1 = 0
-for s in stones:
-	a = blink(s, int(sys.argv[1]))
-	p1 += len(a)
-
-print("Part 1:", p1)
+c = Counter(stones)
+print("Part 1:", c.total())
