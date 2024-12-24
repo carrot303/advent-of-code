@@ -1,79 +1,92 @@
 from collections import defaultdict
-_input = input
 import copy
 
+_input = input
+
 input = """
-AAA
+RRRRIICCFF
+RRRRIICCCF
+VVRRRCCFFF
+VVRCCCJFFF
+VVVVCJJCFE
+VVIVCCJJEE
+VVIIICJJEE
+MIIIIIJJEE
+MIIISIJEEE
+MMMISSJEEE
 """
 
 with open("input_day12.txt") as file: input = file.read()
 
 
-def space_between(lst):
-	ll = list(lst)
-	if type(lst) == str:
-		l = ["." for i in range(len(ll)-1)]
-	else:
-		l = [["." for i in range(len(ll[0]))] for i in range(len(ll)-1)]
-	c = []
-	for i in range(len(ll)):
-		c.append(ll.pop(0))
-		l and c.append(l.pop(0))
-	return c
-
-map = []
-for i in input.strip().split("\n"):
-	d = copy.deepcopy(space_between(i))
-	map.append(['.', '.'] + d + ['.', '.'])
-
-map = space_between(map)
-map.insert(0, ["." for i in range(len(map[0]))])
-map.insert(0, ["." for i in range(len(map[0]))])
-map.append(["." for i in range(len(map[0]))])
-map.append(["." for i in range(len(map[0]))])
-
+map = [list(i) for i in input.strip().split("\n")]
 
 lrow = len(map)
 lcol = len(map[0])
-visited = {}
-directions = [(2,0),(-2,0),(0,2),(0,-2)]
-vertex_coords_offset = [(1, 1),(-1, -1), (1, -1), (-1, 1)]
+visited = defaultdict(bool)
+directions = [(1,0),(-1,0),(0,1),(0,-1)]
+dir_symbols = "BTRL"
+inside_vertices = {
+	"TL": (-1, -1),
+	"TR": (-1, 1),
+	"BL": (1, -1),
+	"BR": (1, 1),
+}
 
 
+def inbound(row, col):
+	return 0 <= row < lrow and 0 <= col < lcol
 
 
-
-
-def solve(row, col, vertexs, cnt=1):
-	visited[(row, col)] = True
-	plant = map[row][col]
-	vertexs += [(row+vr, col+vc) for vr, vc in vertex_coords_offset]
-
+def get_shape(row, col, points):
+	letters = map[row][col]
+	visited[(row, col)] = letters
+	points.append((row, col))
 	for r, c in directions:
-		if map[row+r][col+c] == plant and (row+r, col+c) not in visited:
-			_, cnt = solve(row+r, col+c, vertexs, cnt+1)
+		if (inbound(row+r, col+c)
+			and not visited[(row+r, col+c)]
+			and map[row+r][col+c] == letters):
+			get_shape(row+r, col+c, points)
+	return points
 
-	return vertexs, cnt
+
+def get_neighboors(point, points):
+	neighboors = 0
+	ns = ""
+	for r, c in directions:
+		if (point[0]+r, point[1]+c) in points:
+			neighboors += 1
+			ns += dir_symbols[directions.index((r, c))]
+	return neighboors, ns
 
 
 
-
-p1 = 0
-found = False
+part1 = 0
+part2 = 0
 for i in range(lrow):
 	for j in range(lcol):
-		if map[i][j] == ".": continue
-		if (i, j) in visited: continue
+		if map[i][j] == "." or visited[(i, j)]:
+			continue
+		points = get_shape(i, j, [])
+		perimiter = 0
+		corners = 0
+		letter = map[i][j]
+		for p in points:
+			pr,pc = p
+			nc, ns = get_neighboors(p, points)
+			perimiter += 4 - nc
+			if ns in ["BR", "TR", "TL", "BL"]:
+				corners += 1
+			if ns in ["B", "R", "T", "L"]:
+				corners += 2
+			for iv in inside_vertices:
+				tr, tc = inside_vertices[iv]
+				if (iv[0] in ns and iv[1] in ns
+					and map[pr+tr][pc+tc] != letter):
+					corners += 1
 
-		vertexs, area = solve(i, j, [])
-		found = True
-		u_vertexs = set(vertexs)
-		vs = [uv for uv in u_vertexs if vertexs.count(uv) < 4]
-		traverse_perimeter(vs, vertexs)
-		p1 += area*len(vs)
-		break
-	if found:
-		break
+		part1 += len(points) * perimiter
+		part2 += len(points) * max(4, corners)
 
-for i in map:
-	print("".join(i))
+print("Part 1:", part1)
+print("Part 2:", part2)
